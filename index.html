@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple URL Shortener</title>
+
+    <!-- Tailwind CSS -->
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- Vue JS -->
+    <script src="https://unpkg.com/vue@next"></script>
+    <!-- Axios -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.9.1/axios.min.js"></script>
+    <!-- Clipboard.js -->
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
+  </head>
+  <body>
+    <div class="container h-screen w-screen flex mx-auto" id="app">
+      <div class="flex items-center mx-auto w-2/3">
+        <div class="mb-6 w-full">
+          <div class="flex flex-col mb-4">
+            <p
+              class="mb-5 font-bold text-5xl text-indigo-700 text-center copy"
+              data-clipboard-target="#text"
+              data-clipboard-action="copy"
+              id="text"
+            >
+              {{ tagline }}
+            </p>
+            <p v-show="message" class="mb-5 text-sm text-gray-400 text-center">
+              {{ message }}
+            </p>
+            <input
+              class="
+                border border-gray-300
+                py-6
+                px-8
+                bg-white
+                text-gray-800 text-center
+              "
+              type="text"
+              id="url"
+              placeholder="Paste URL here and press Submit button"
+              v-model="url"
+              required
+            />
+          </div>
+          <button
+            class="
+              block
+              bg-indigo-600
+              hover:bg-indigo-700
+              text-white
+              uppercase
+              text-lg
+              w-40
+              p-4
+              mx-auto
+              rounded
+            "
+            @click="urlShorten"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      const App = {
+        data() {
+          return {
+            tagline: "Let's shorten that up a bit.",
+            url: "",
+            message: "",
+          };
+        },
+        methods: {
+          urlShorten() {
+            var data = JSON.stringify({
+              long_url: this.url,
+              domain: "https://t.ly/",
+              api_token:
+                "YOUR_API_TOKEN",
+            });
+
+            var config = {
+              method: "post",
+              url: "https://t.ly/api/v1/link/shorten",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              data: data,
+            };
+
+            axios(config)
+              .then((response) => {
+                this.tagline = response.data.short_url;
+                this.message = "Click the link to copy to clipboard.";
+                this.url = "";
+              })
+              .catch((error) => {
+                this.tagline = error;
+              });
+          },
+        },
+      };
+      Vue.createApp(App).mount("#app");
+    </script>
+    <script>
+      var clipboard = new ClipboardJS(".copy");
+      clipboard.on("success", function (e) {
+        alert("Copied to Clipboard!");
+      });
+    </script>
+  </body>
+</html>
